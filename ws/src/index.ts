@@ -2,6 +2,7 @@ import { WebSocket, WebSocketServer } from "ws";
 const wss = new WebSocketServer({ port: 8080 });
 
 type User = {
+  id:string
   name: string;
   socket: WebSocket;
   roomId: string;
@@ -20,7 +21,7 @@ class ChatRoom {
         switch (parsedData.type) {
           case "new_joining":
             const roomId = parsedData.roomId;
-            const user = { name: parsedData.name, socket: socket, roomId };
+            const user = {id:"", name: parsedData.name, socket: socket, roomId};
             this.addUser(user, roomId);
             break;
           case "send_message":
@@ -29,7 +30,8 @@ class ChatRoom {
               parsedData.message,
               parsedData.name,
               parsedData.date,
-              parsedData.roomId
+              parsedData.roomId,
+              parsedData.image
             );
         }
       });
@@ -70,7 +72,8 @@ class ChatRoom {
     message: string,
     name: string,
     date: string,
-    roomId: string
+    roomId: string,
+    image?:string
   ) {
     console.log("message: ", message);
     console.log("roomId: ",roomId);
@@ -85,6 +88,7 @@ class ChatRoom {
               name,
               message,
               date,
+              image
             },
           },
         })

@@ -24,10 +24,15 @@ export const nameAtom = atom({
 
 export const messagesAtom = atom<message[]>({
     key:"messages",
-    default:[]
+    default:JSON.parse(localStorage.getItem("messages")||"[]")
 })
 
 export const roomIdAtom = atom<string>({
     key:"roomId",
+    default:""
+})
+
+export const iamgeAtom = atom({
+    key:"image",
     default:""
 })
