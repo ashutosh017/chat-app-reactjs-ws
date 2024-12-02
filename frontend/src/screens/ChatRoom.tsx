@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect,  useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
   iamgeAtom,
-  messagesAtom,
   nameAtom,
   roomIdAtom,
   socketAtom,
@@ -12,7 +11,8 @@ import { Button } from "../components/Button";
 
 export const ChatRoom = () => {
   const messageRef = useRef<HTMLInputElement>(null);
-  const [socket, setSocket] = useRecoilState(socketAtom);
+  // const [socket, setSocket] = useRecoilState(socketAtom);
+  const socket = useRecoilState(socketAtom)[0];
   const [name, setName] = useRecoilState(nameAtom);
   const [roomId, setRoomId] = useRecoilState(roomIdAtom);
   const [selectedImage, setSelectedImage] = useRecoilState(iamgeAtom);
@@ -110,10 +110,9 @@ export const ChatRoom = () => {
 };
 
 const Messages = () => {
-  const [socket, setSocket] = useRecoilState(socketAtom);
-  const [name, setName] = useRecoilState(nameAtom);
+  // const [socket, setSocket] = useRecoilState(socketAtom);
+  const socket = useRecoilState(socketAtom)[0];
   const [messages, setMessages] = useState<message[]>([])
-  const [roomId, setRoomId] = useRecoilState(roomIdAtom);
   useEffect(() => {
     localStorage.setItem("messages",JSON.stringify("[]"))
     setMessages([])
@@ -122,22 +121,6 @@ const Messages = () => {
     localStorage.setItem("messages", JSON.stringify(messages));
   }, [messages]);
   useEffect(() => {
-    // const roomId2: string = localStorage.getItem("roomId") as string;
-    // if (!roomId2) {
-    //   if (roomId !== "") {
-    //     localStorage.setItem("roomId", roomId);
-    //   }
-    // }
-    // if (roomId === "") {
-    //   if (roomId2 !== "") {
-    //     setRoomId(roomId2);
-    //   }
-    // }
-    // if (name === "") {
-    //   const name2 = localStorage.getItem("name") as string;
-    //   setName(name2);
-    // }
-
     socket.onmessage = (ev) => {
       let parsedData = JSON.parse(ev.data);
       if (parsedData.type === "someone_joined") {
