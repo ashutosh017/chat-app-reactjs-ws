@@ -1,33 +1,20 @@
 import { useEffect, useRef } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { nameAtom, roomIdAtom, socketAtom } from "./store/atom";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { ChatRoom } from "./screens/ChatRoom";
 import { Button } from "./components/Button";
+import { generateRandomRoomId } from "./Functions/generateRandomId";
 
-const generateRandomRoomId = () => {
-  const a: string =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-  const n = a.length;
-  let randomRoomId = "";
-  for (let i = 0; i < 10; i++) {
-    const randomIndex = Math.floor(Math.random() * n);
-    randomRoomId += a[randomIndex % n];
-  }
-  console.log("randomRoomId: ", randomRoomId);
-  return randomRoomId;
-};
+
 
 function App2() {
   const nameRef = useRef<HTMLInputElement>(null);
   const roomIdInputRef = useRef<HTMLInputElement>(null);
-  // const [roomId, setRoomId] = useRecoilState(roomIdAtom);
   const setRoomId = useSetRecoilState(roomIdAtom)
-  // const [socket, setSocket] = useRecoilState(socketAtom);
   const socket = useRecoilValue(socketAtom);
   const navigate = useNavigate();
-  // const [name, setName] = useRecoilState(nameAtom);
-  const setName = useRecoilState(nameAtom)[1];
+  const setName = useSetRecoilState(nameAtom);
 
   useEffect(() => {
     localStorage.setItem("socket", JSON.stringify(socket));

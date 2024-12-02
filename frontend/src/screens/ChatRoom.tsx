@@ -8,6 +8,7 @@ import {
 } from "../store/atom";
 import { message } from "../types";
 import { Button } from "../components/Button";
+import { CgAttachment } from "react-icons/cg";
 
 export const ChatRoom = () => {
   const messageRef = useRef<HTMLInputElement>(null);
@@ -102,6 +103,7 @@ export const ChatRoom = () => {
         </Button>
       </div>
       <div className="">
+      <CgAttachment/>
         <input type="file" ref={imageRef} onChange={handleFileChange} />
       </div>
       <Messages />
