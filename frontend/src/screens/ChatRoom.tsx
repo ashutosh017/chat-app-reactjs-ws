@@ -5,6 +5,10 @@ import { message } from "../types";
 import { Button } from "../components/Button";
 import { IoMdSend } from "react-icons/io";
 import { CgAttachment } from "react-icons/cg";
+import { MdOutlineContentCopy } from "react-icons/md";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Messages } from "../components/Messages";
 
 export const ChatRoom = () => {
   const messageRef = useRef<HTMLInputElement>(null);
@@ -80,7 +84,30 @@ export const ChatRoom = () => {
   };
   return (
     <div className="p-2 flex flex-col items-center h-screen w-full bg-zinc-900 text-white ">
-      <div className="text-xl font-bold ">{roomId}</div>
+      <ToastContainer
+      />
+      <div className="text-xl font-bold  min-h-10 flex justify-center items-center w-full rounded-md space-x-2 lg:w-1/2">
+        <div>{roomId}</div>
+        <div className="">
+          <MdOutlineContentCopy
+            onClick={() => {
+              navigator.clipboard.writeText(roomId);
+              toast.success("Room ID copied to clipboard!", {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+              });
+            }}
+            className="size-6 hover:opacity-80"
+          />
+        </div>
+      </div>
       <Messages />
 
       <div className="flex  lg:bottom-8 lg:w-1/2 px-2 w-full space-x-2  ">
@@ -123,76 +150,5 @@ export const ChatRoom = () => {
   );
 };
 
-const Messages = () => {
-  // const socket = useRecoilState(socketAtom)[0];
-  const socket = useRecoilValue(socketAtom);
-  const [messages, setMessages] = useState<message[]>([]);
-  // useEffect(() => {
-  //   localStorage.setItem("messages", JSON.stringify("[]"));
-  //   setMessages([]);
-  // }, []);
-  useEffect(() => {
-    localStorage.setItem("messages", JSON.stringify(messages));
-  }, [messages]);
-  useEffect(() => {
-    socket.onmessage = (ev) => {
-      let parsedData = JSON.parse(ev.data);
-      if (parsedData.type === "someone_joined") {
-        console.log("parsedData: ", parsedData);
-      } else if (parsedData.type === "new_message") {
-        parsedData = parsedData.payload.data;
-        const messageObj: message = {
-          name: parsedData.name,
-          message: parsedData.message,
-          date: parsedData.date,
-          image: parsedData.image,
-        };
 
-        setMessages((cur) => {
-          if (messageObj.name || messageObj.message || messageObj.date) {
-            return [...cur, messageObj];
-          }
-          return cur;
-        });
-        console.log("messages.length: ", messages.length);
-      }
-    };
-  }, []);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const prevMessagesRef = useRef(messages);
-
-  // Scroll to bottom only for new messages
-  useEffect(() => {
-    if (messages.length > prevMessagesRef.current.length) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-    prevMessagesRef.current = messages;
-  }, [messages]);
-  // useEffect(() => {
-  //   if (messagesEndRef.current) {
-  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [messages]); // Trigger whenever `messages` change
-
-  return (
-    <div className="border border-white w-full px-4 py-4 rounded-md flex-grow my-4 overflow-y-scroll">
-      {messages.length > 0 &&
-        messages.map((msg, ind) => <Message key={ind} msg={msg} />)}
-      <div ref={messagesEndRef} />
-    </div>
-  );
-};
-
-const Message = React.memo(({ msg }: { msg: message }) => {
-  return (
-    <div className={`bg-zinc-800 w-full rounded-md my-2 px-2 py-2 `}>
-      <div className="text-md font-bold flex space-x-2">
-        <span className="">{msg.name}</span>
-        <span className="text-sm font-normal">{msg.date}</span>
-      </div>
-      <div className="text-wrap break-words">{msg.message}</div>
-      {msg.image && <img src={msg.image} alt="image" />}
-    </div>
-  );
-})

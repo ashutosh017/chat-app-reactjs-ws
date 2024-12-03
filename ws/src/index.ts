@@ -43,6 +43,11 @@ class ChatRoom {
   }
 
   private addUser(user: User, roomId: string) {
+    const user2 = this.users.find((user2)=>user2.socket===user.socket)
+    if(user2){
+      console.log("user already exists: ",user2.name);
+      return;
+    }
     this.users.push(user);
     if (this.room.get(roomId)) {
       console.log("pushing in already existing room")
