@@ -46,7 +46,7 @@ export const Messages = () => {
     }, [messages]);
   
     return (
-      <div className=" border-white w-full px-4 py-2 rounded-md flex-grow my-4 overflow-y-scroll lg:w-1/2 flex flex-col  ">
+      <div className=" border-white w-full px-4 py-2 rounded-md my-4 overflow-y-scroll lg:w-1/2 flex flex-col  ">
         {messages.length > 0 &&
           messages.map((msg, ind) => <Message key={ind} msg={msg} />)}
         <div ref={messagesEndRef} />

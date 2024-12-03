@@ -7,8 +7,8 @@ app.get("/ping",(req, res)=>{
   res.send("pong");
 })
 
-app.listen(8080,()=>{
-  console.log("app is listening on port: 8080");
+app.listen(3000,()=>{
+  console.log("app is listening on port: 3000");
 })
 
 const wss = new WebSocketServer({ port: 8080 });

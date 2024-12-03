@@ -82,10 +82,10 @@ export const ChatRoom = () => {
     }
   };
   return (
-    <div className="p-2 flex flex-col items-center h-screen w-full bg-zinc-900 text-white ">
+    <div className="p-2 flex flex-col items-center h-screen w-full bg-zinc-900 text-white justify-end">
       <ToastContainer
       />
-      <div className="text-xl font-bold  min-h-10 flex justify-center items-center w-full rounded-md space-x-2 lg:w-1/2">
+      <div className="text-xl font-bold  min-h-10 flex justify-center items-center w-full rounded-md space-x-2 lg:w-1/2 absolute top-4 bg-zinc-900 pb-4">
         <div>{roomId}</div>
         <div className="">
           <MdOutlineContentCopy
