@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import React, { useEffect, useRef } from "react";
+import { useRecoilState } from "recoil";
 import { iamgeAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
-import { message } from "../types";
 import { Button } from "../components/Button";
 import { IoMdSend } from "react-icons/io";
 import { CgAttachment } from "react-icons/cg";
