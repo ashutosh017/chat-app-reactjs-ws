@@ -1,4 +1,16 @@
 import { WebSocket, WebSocketServer } from "ws";
+import express from 'express'
+
+const app = express();
+
+app.get("/ping",(req, res)=>{
+  res.send("pong");
+})
+
+app.listen(8080,()=>{
+  console.log("app is listening on port: 8080");
+})
+
 const wss = new WebSocketServer({ port: 8080 });
 
 type User = {
