@@ -77,6 +77,7 @@ export const ChatRoom = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setSelectedImage(reader.result as string);
+        console.log("reader.result as string = ",reader.result)
       };
       reader.readAsDataURL(file);
     }

@@ -36,3 +36,8 @@ export const iamgeAtom = atom({
     key:"image",
     default:""
 })
+
+export const avatarAtom = atom<string>({
+    key:"avatar",
+    default:""
+})
