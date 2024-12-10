@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { avatarAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
+import {  nameAtom, roomIdAtom, socketAtom } from "../store/atom";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { generateRandomRoomId } from "../Functions/generateRandomId";
@@ -63,13 +63,13 @@ function App2() {
   };
 
   const avatarRef = useRef<HTMLInputElement>(null);
-  const setAvatar = useSetRecoilState(avatarAtom)
-  const onAvatarInputChange =(e: React.ChangeEvent<HTMLInputElement>) => {
+  // const setAvatar = useSetRecoilState(avatarAtom)
+  const onAvatarInputChange =() => {
     // if(e.target.files){
     //  const avatar = e.target.files[0];
     //  const reader = new FileReader();
     //  reader.onload = ()=>{
-    //     setAvatar()
+    //     setAvatar(null)
     //  }
 
     // }
