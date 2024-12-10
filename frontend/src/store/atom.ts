@@ -9,7 +9,7 @@ export const userAtom =  atom({
 
 export const socketAtom = atom({
     key:"socket",
-    default:new WebSocket(import.meta.env.VITE_WS_URL??"ws://localhost:8080")
+    default:new WebSocket(import.meta.env.VITE_WS_URL??"https://chat-app-react-wss.vercel.app/")
 })
 
 export const messageAtom = atom({
