@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import {  nameAtom, roomIdAtom, socketAtom } from "../store/atom";
+import {  avatarAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { generateRandomRoomId } from "../Functions/generateRandomId";
@@ -12,6 +12,9 @@ function App2() {
   const socket = useRecoilValue(socketAtom);
   const navigate = useNavigate();
   const setName = useSetRecoilState(nameAtom);
+  const setAvatar = useSetRecoilState(avatarAtom)
+  const avatar = useRecoilValue(avatarAtom);
+  const avatarRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     localStorage.setItem("socket", JSON.stringify(socket));
@@ -28,14 +31,15 @@ function App2() {
   const joinRoom = (
     socket: WebSocket,
     joiners_name: string | undefined,
-    roomId: string | undefined
+    roomId: string | undefined,
+    avatar:string|undefined
   ) => {
     if (
       joiners_name === undefined ||
       joiners_name === "" ||
       roomId === undefined
     ) {
-      alert("joiners name cannot be undefined");
+      alert("joiners name or roomId cannot be undefined");
       return;
     }
     let name2 =
@@ -45,6 +49,7 @@ function App2() {
     localStorage.setItem("socket", JSON.stringify(socket));
     localStorage.setItem("name", joiners_name);
     localStorage.setItem("roomId", roomId);
+    localStorage.setItem("avatar",avatar??"");
     setRoomId(roomId);
     setName(name2);
     navigate("/chatroom");
@@ -52,27 +57,26 @@ function App2() {
 
   const handleJoinRoom = () => {
     const randomRoomId = generateRandomRoomId();
-
     joinRoom(
       socket,
       nameRef.current?.value,
       roomIdInputRef.current?.value === ""
         ? randomRoomId
-        : roomIdInputRef.current?.value
+        : roomIdInputRef.current?.value,
+      avatar
     );
   };
 
-  const avatarRef = useRef<HTMLInputElement>(null);
-  // const setAvatar = useSetRecoilState(avatarAtom)
-  const onAvatarInputChange =() => {
-    // if(e.target.files){
-    //  const avatar = e.target.files[0];
-    //  const reader = new FileReader();
-    //  reader.onload = ()=>{
-    //     setAvatar(null)
-    //  }
+  const onAvatarInputChange =(e: React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files){
+     const file = e.target.files[0];
+     const reader = new FileReader();
+     reader.onload = ()=>{
+        setAvatar(reader.result as string)
+     }
+     reader.readAsDataURL(file);
 
-    // }
+    }
      
 
   }

@@ -9,9 +9,9 @@ export const Messages = () => {
     const [messages, setMessages] = useState<message[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const prevMessagesRef = useRef(messages);
-    useEffect(() => {
-      localStorage.setItem("messages", JSON.stringify(messages));
-    }, [messages]);
+    // useEffect(() => {
+    //   localStorage.setItem("messages", JSON.stringify(messages));
+    // }, [messages]);
     useEffect(() => {
       socket.onmessage = (ev) => {
         let parsedData = JSON.parse(ev.data);
@@ -24,6 +24,7 @@ export const Messages = () => {
             message: parsedData.message,
             date: parsedData.date,
             image: parsedData.image,
+            avatar:parsedData.avatar
           };
   
           setMessages((cur) => {

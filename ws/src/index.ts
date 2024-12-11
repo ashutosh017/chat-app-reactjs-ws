@@ -1,23 +1,13 @@
 import { WebSocket, WebSocketServer } from "ws";
-// import express from 'express'
-
-// const app = express();
-
-// app.get("/ping",(req, res)=>{
-//   res.send("pong");
-// })
-
-// app.listen(3000,()=>{
-//   console.log("app is listening on port: 3000");
-// })
 
 const wss = new WebSocketServer({ port: 8080 });
 
 type User = {
-  id:string
+  id: string;
   name: string;
   socket: WebSocket;
   roomId: string;
+  avatar: string;
 };
 class ChatRoom {
   private users: User[];
@@ -31,44 +21,41 @@ class ChatRoom {
       socket.on("message", (data) => {
         const parsedData = JSON.parse(data.toString());
         switch (parsedData.type) {
+          // receiving from client
           case "new_joining":
+            const id = "";
             const roomId = parsedData.roomId;
-            const user = {id:"", name: parsedData.name, socket: socket, roomId};
+            const name = parsedData.name;
+            const avatar = parsedData.avatar;
+            const user = { id, name, socket, roomId, avatar };
             this.addUser(user, roomId);
             break;
           case "send_message":
             this.send_message(
-              socket,
               parsedData.message,
               parsedData.name,
               parsedData.date,
               parsedData.roomId,
-              parsedData.image
+              parsedData.image,
+              parsedData.avatar
             );
         }
       });
       socket.on("close", () => {
         const user = this.users.find((user) => user.socket === socket);
-        console.log("user: ", user?.name, " has left the room");
       });
     });
   }
 
   private addUser(user: User, roomId: string) {
-    const user2 = this.users.find((user2)=>user2.socket===user.socket)
-    if(user2){
-      console.log("user already exists: ",user2.name);
+    const user2 = this.users.find((user2) => user2.socket === user.socket);
+    if (user2) {
       return;
     }
     this.users.push(user);
-    if (this.room.get(roomId)) {
-      console.log("pushing in already existing room")
-      this.room.set(roomId, [...(this.room.get(roomId) ?? []), user]);
-    } else {
-      console.log("pushing in new room")
-      
-      this.room.set(roomId, [user]);
-    }
+    this.room.get(roomId)
+      ? this.room.set(roomId, [...(this.room.get(roomId) ?? []), user])
+      : this.room.set(roomId, [user]);
     this.init_handler(user, roomId);
   }
   private init_handler(user: User, roomId: string) {
@@ -85,18 +72,15 @@ class ChatRoom {
     });
   }
   private send_message(
-    socket: WebSocket,
     message: string,
     name: string,
     date: string,
     roomId: string,
-    image?:string
+    image?: string,
+    avatar?:string
   ) {
-    console.log("message: ", message);
-    console.log("roomId: ",roomId);
-    console.log("this.room.get(roomId): ",this.room.get(roomId))
     this.room.get(roomId)?.forEach((otherUser) => {
-      console.log("room found: ",otherUser.roomId);
+      // sending to client
       otherUser.socket.send(
         JSON.stringify({
           type: "new_message",
@@ -105,7 +89,8 @@ class ChatRoom {
               name,
               message,
               date,
-              image
+              image,
+              avatar
             },
           },
         })
@@ -114,4 +99,4 @@ class ChatRoom {
   }
 }
 
-const chatRoom = new ChatRoom();
+new ChatRoom();

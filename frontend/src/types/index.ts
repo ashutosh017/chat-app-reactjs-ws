@@ -3,4 +3,5 @@ export interface message {
     message: string;
     date:string
     image?:string
+    avatar?:string
   }
