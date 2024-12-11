@@ -26,6 +26,23 @@ export const ChatRoom = () => {
   const avatar = useRecoilValue(avatarAtom);
   const setAvatar = useSetRecoilState(avatarAtom);
   const [selectedImageName, setSelectedImageName] = useState("");
+  // useEffect(() => {
+  //   const roomId2 = localStorage.getItem("roomId") as string;
+  //   const name2 = localStorage.getItem("name") as string;
+  //   const avatar2 = localStorage.getItem("avatar") as string;
+  //   setRoomId(roomId2);
+  //   setName(name2);
+  //   setAvatar(avatar2);
+  //   socket.send(
+  //     // sending to server
+  //     JSON.stringify({
+  //       type: "new_joining",
+  //       roomId: roomId2,
+  //       name: name2,
+  //       avatar: avatar2,
+  //     })
+  //   );
+  // }, []);
   useEffect(() => {
     const roomId2 = localStorage.getItem("roomId") as string;
     const name2 = localStorage.getItem("name") as string;
@@ -33,16 +50,34 @@ export const ChatRoom = () => {
     setRoomId(roomId2);
     setName(name2);
     setAvatar(avatar2);
-    socket.send(
-      // sending to server
-      JSON.stringify({
-        type: "new_joining",
-        roomId: roomId2,
-        name: name2,
-        avatar: avatar2,
-      })
-    );
+  
+    const sendMessage = () => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "new_joining",
+            roomId: roomId2,
+            name: name2,
+            avatar: avatar2,
+          })
+        );
+      } else {
+        console.warn("Socket is not ready, message not sent.");
+      }
+    };
+  
+    if (socket.readyState === WebSocket.CONNECTING) {
+      socket.addEventListener("open", sendMessage, { once: true });
+    } else {
+      sendMessage();
+    }
+  
+    // Clean up the event listener
+    return () => {
+      socket.removeEventListener("open", sendMessage);
+    };
   }, []);
+  
 
   const handleSendMessage = () => {
     const now = new Date();
