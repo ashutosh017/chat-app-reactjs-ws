@@ -1,6 +1,15 @@
 import { WebSocket, WebSocketServer } from "ws";
+import cron from 'node-cron'
+import express from 'express'
+import http from 'http'
+const app  = express();
+const server = http.createServer(app)
+const wss = new WebSocketServer({ server});
+app.get("/", (req, res) => {
+  res.send("HTTP server is running");
+});
 
-const wss = new WebSocketServer({ port: 8080 });
+
 
 type User = {
   id: string;
@@ -99,4 +108,18 @@ class ChatRoom {
   }
 }
 
+server.listen(8080,()=>console.log("hello"))
+
 new ChatRoom();
+
+const broadcastMessage = (message:string) => {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+};
+cron.schedule('* * * * *', () => {
+  console.log('Cron job executed: Broadcasting message to all clients');
+  broadcastMessage('This is a scheduled message from the server!');
+});

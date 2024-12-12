@@ -39,7 +39,7 @@ function App2() {
       joiners_name === "" ||
       roomId === undefined
     ) {
-      alert("joiners name or roomId cannot be undefined");
+      alert("joiners name cannot be undefined");
       return;
     }
     let name2 =
@@ -109,7 +109,7 @@ function App2() {
           ref={roomIdInputRef}
           type="text"
           className=" border border-gray-400 p-2 rounded-md bg-zinc-700 text-white "
-          placeholder="Enter room id"
+          placeholder="Enter room id (optional)"
         />
         <Button func={handleJoinRoom}>Join Room</Button>
       </div>
