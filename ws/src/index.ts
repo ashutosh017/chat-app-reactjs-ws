@@ -1,15 +1,14 @@
 import { WebSocket, WebSocketServer } from "ws";
-import cron from 'node-cron'
-import express from 'express'
-import http from 'http'
-const app  = express();
-const server = http.createServer(app)
-const wss = new WebSocketServer({ server});
+// import cron from "node-cron";
+import express from "express";
+import http from "http";
+import { randomUUID } from "crypto";
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 app.get("/", (req, res) => {
   res.send("HTTP server is running");
 });
-
-
 
 type User = {
   id: string;
@@ -28,34 +27,50 @@ class ChatRoom {
     wss.on("connection", (socket) => {
       console.log("someone has joined!");
       socket.on("message", (data) => {
-        const parsedData = JSON.parse(data.toString());
-        switch (parsedData.type) {
-          // receiving from client
-          case "new_joining":
-            const id = "";
-            const roomId = parsedData.roomId;
-            const name = parsedData.name;
-            const avatar = parsedData.avatar;
-            const user = { id, name, socket, roomId, avatar };
-            this.addUser(user, roomId);
-            break;
-          case "send_message":
-            this.send_message(
-              parsedData.message,
-              parsedData.name,
-              parsedData.date,
-              parsedData.roomId,
-              parsedData.image,
-              parsedData.avatar
-            );
+        try {
+          const parsedData = JSON.parse(data.toString());
+          switch (parsedData.type) {
+            case "new_joining":
+              const id = randomUUID();
+              const roomId = parsedData.roomId;
+              const name = parsedData.name;
+              const avatar = parsedData.avatar;
+              const user = { id, name, socket, roomId, avatar };
+              this.addUser(user, roomId);
+              break;
+            case "send_message":
+              this.send_message(
+                parsedData.message,
+                parsedData.name,
+                parsedData.date,
+                parsedData.roomId,
+                parsedData.image,
+                parsedData.avatar
+              );
+          }
+        } catch (error) {
+          return;
         }
       });
       socket.on("close", () => {
-        const user = this.users.find((user) => user.socket === socket);
+        this.removeUser(socket);
       });
     });
   }
+  private removeUser(socket: WebSocket) {
+    const user = this.users.find((u) => u.socket === socket);
+    if (!user) return;
 
+    this.users = this.users.filter((u) => u.socket !== socket);
+    const roomUsers = this.room.get(user.roomId) ?? [];
+    this.room.set(
+      user.roomId,
+      roomUsers.filter((u) => u.socket !== socket)
+    );
+    if (this.room.get(user.roomId)?.length === 0) {
+      this.room.delete(user.roomId);
+    }
+  }
   private addUser(user: User, roomId: string) {
     const user2 = this.users.find((user2) => user2.socket === user.socket);
     if (user2) {
@@ -86,10 +101,9 @@ class ChatRoom {
     date: string,
     roomId: string,
     image?: string,
-    avatar?:string
+    avatar?: string
   ) {
     this.room.get(roomId)?.forEach((otherUser) => {
-      // sending to client
       otherUser.socket.send(
         JSON.stringify({
           type: "new_message",
@@ -99,7 +113,7 @@ class ChatRoom {
               message,
               date,
               image,
-              avatar
+              avatar,
             },
           },
         })
@@ -108,18 +122,18 @@ class ChatRoom {
   }
 }
 
-server.listen(8080,()=>console.log("hello"))
+server.listen(8080, () => console.log("hello"));
 
 new ChatRoom();
 
-const broadcastMessage = (message:string) => {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
-};
-cron.schedule('* * * * *', () => {
-  console.log('Cron job executed: Broadcasting message to all clients');
-  broadcastMessage('This is a scheduled message from the server!');
-});
+// const broadcastMessage = (message: string) => {
+//   wss.clients.forEach((client) => {
+//     if (client.readyState === WebSocket.OPEN) {
+//       client.send(message);
+//     }
+//   });
+// };
+// cron.schedule("*/5 * * * *", () => {
+//   console.log("Cron job executed: Broadcasting message to all clients");
+//   broadcastMessage("This is a scheduled message from the server!");
+// });

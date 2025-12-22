@@ -1,4 +1,4 @@
-export interface message {
+export interface MessageInterface {
     name: string;
     message: string;
     date:string

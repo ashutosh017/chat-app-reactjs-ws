@@ -1,20 +1,22 @@
 import { useEffect, useRef } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {  avatarAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { avatarAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { generateRandomRoomId } from "../Functions/generateRandomId";
 
-function App2() {
+function HomeScreen() {
+  const navigate = useNavigate();
+
   const nameRef = useRef<HTMLInputElement>(null);
   const roomIdInputRef = useRef<HTMLInputElement>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
+
+  const [avatar, setAvatar] = useRecoilState(avatarAtom);
+
   const setRoomId = useSetRecoilState(roomIdAtom);
   const socket = useRecoilValue(socketAtom);
-  const navigate = useNavigate();
   const setName = useSetRecoilState(nameAtom);
-  const setAvatar = useSetRecoilState(avatarAtom)
-  const avatar = useRecoilValue(avatarAtom);
-  const avatarRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     localStorage.setItem("socket", JSON.stringify(socket));
@@ -32,7 +34,7 @@ function App2() {
     socket: WebSocket,
     joiners_name: string | undefined,
     roomId: string | undefined,
-    avatar:string|undefined
+    avatar: string | undefined
   ) => {
     if (
       joiners_name === undefined ||
@@ -49,10 +51,10 @@ function App2() {
     localStorage.setItem("socket", JSON.stringify(socket));
     localStorage.setItem("name", joiners_name);
     localStorage.setItem("roomId", roomId);
-    localStorage.setItem("avatar",avatar??"");
+    localStorage.setItem("avatar", avatar ?? "");
     setRoomId(roomId);
     setName(name2);
-    navigate("/chatroom");
+    navigate(`/chatroom/${roomId}`);
   };
 
   const handleJoinRoom = () => {
@@ -67,19 +69,16 @@ function App2() {
     );
   };
 
-  const onAvatarInputChange =(e: React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.files){
-     const file = e.target.files[0];
-     const reader = new FileReader();
-     reader.onload = ()=>{
-        setAvatar(reader.result as string)
-     }
-     reader.readAsDataURL(file);
-
+  const onAvatarInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-     
-
-  }
+  };
   return (
     <div className="p-4 lg:p-16 h-screen w-full bg-zinc-900 ">
       <div className="flex flex-col space-y-2 lg:w-1/2  mx-auto">
@@ -95,10 +94,16 @@ function App2() {
           placeholder="Enter your name"
           autoFocus
         />
-        <div  className="text-white flex space-x-4 flex-col md:flex-row md:items-center md:justify-centerp-1">
-            <span className="font-thin lg:text-lg">Select your avatar (optional): </span>
-        <input type="file" ref={avatarRef} onChange={onAvatarInputChange} className="text-white"/>
-
+        <div className="text-white flex space-x-4 flex-col md:flex-row md:items-center md:justify-centerp-1">
+          <span className="font-thin lg:text-lg">
+            Select your avatar (optional):{" "}
+          </span>
+          <input
+            type="file"
+            ref={avatarRef}
+            onChange={onAvatarInputChange}
+            className="text-white"
+          />
         </div>
         <input
           onKeyDown={(e) => {
@@ -117,4 +122,4 @@ function App2() {
   );
 }
 
-export default App2;
+export default HomeScreen;

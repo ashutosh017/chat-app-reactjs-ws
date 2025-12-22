@@ -15,9 +15,8 @@ import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Messages } from "../components/Messages";
 
-export const ChatRoom = () => {
+export default function ChatRoom() {
   const messageRef = useRef<HTMLInputElement>(null);
-  // const [socket, setSocket] = useRecoilState(socketAtom);
   const socket = useRecoilState(socketAtom)[0];
   const [name, setName] = useRecoilState(nameAtom);
   const [roomId, setRoomId] = useRecoilState(roomIdAtom);
@@ -26,23 +25,7 @@ export const ChatRoom = () => {
   const avatar = useRecoilValue(avatarAtom);
   const setAvatar = useSetRecoilState(avatarAtom);
   const [selectedImageName, setSelectedImageName] = useState("");
-  // useEffect(() => {
-  //   const roomId2 = localStorage.getItem("roomId") as string;
-  //   const name2 = localStorage.getItem("name") as string;
-  //   const avatar2 = localStorage.getItem("avatar") as string;
-  //   setRoomId(roomId2);
-  //   setName(name2);
-  //   setAvatar(avatar2);
-  //   socket.send(
-  //     // sending to server
-  //     JSON.stringify({
-  //       type: "new_joining",
-  //       roomId: roomId2,
-  //       name: name2,
-  //       avatar: avatar2,
-  //     })
-  //   );
-  // }, []);
+
   useEffect(() => {
     const roomId2 = localStorage.getItem("roomId") as string;
     const name2 = localStorage.getItem("name") as string;
@@ -50,7 +33,7 @@ export const ChatRoom = () => {
     setRoomId(roomId2);
     setName(name2);
     setAvatar(avatar2);
-  
+
     const sendMessage = () => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(
@@ -65,19 +48,18 @@ export const ChatRoom = () => {
         console.warn("Socket is not ready, message not sent.");
       }
     };
-  
+
     if (socket.readyState === WebSocket.CONNECTING) {
       socket.addEventListener("open", sendMessage, { once: true });
     } else {
       sendMessage();
     }
-  
+
     // Clean up the event listener
     return () => {
       socket.removeEventListener("open", sendMessage);
     };
   }, []);
-  
 
   const handleSendMessage = () => {
     const now = new Date();
@@ -92,7 +74,7 @@ export const ChatRoom = () => {
 
     const date = `${hours}:${formattedMinutes} ${ampm}`;
 
-    if (!socket) {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("returning because there no any socket");
       return;
     }
@@ -118,7 +100,7 @@ export const ChatRoom = () => {
       setSelectedImage("");
     }
     messageRef.current?.focus();
-    setSelectedImageName("")
+    setSelectedImageName("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,16 +152,17 @@ export const ChatRoom = () => {
       </div>
 
       <div className="flex items-center flex-col lg:bottom-8 lg:w-1/2 px-2 w-full space-x-2  ">
-   {selectedImageName &&
-    <div className="w-full flex justify-between items-center lg:w-1/2 bg-zinc-800 px-4 py-1 rounded-t-full">
-    <div className="truncate ">
-          {selectedImageName}
-        </div>
-        <button onClick={()=>setSelectedImageName("")} className="cursor-pointer hover:bg-zinc-700 rounded-md px-2 py-1">
-        <IoMdCloseCircle className='size-5 '/>
-        </button>
-    </div>
-   }
+        {selectedImageName && (
+          <div className="w-full flex justify-between items-center lg:w-1/2 bg-zinc-800 px-4 py-1 rounded-t-full">
+            <div className="truncate ">{selectedImageName}</div>
+            <button
+              onClick={() => setSelectedImageName("")}
+              className="cursor-pointer hover:bg-zinc-700 rounded-md px-2 py-1"
+            >
+              <IoMdCloseCircle className="size-5 " />
+            </button>
+          </div>
+        )}
         <div className="flex  space-x-2 w-full items-center justify-center">
           <div className="flex flex-grow w-full items-center border rounded-md bg-white text-black ">
             <input
@@ -210,4 +193,4 @@ export const ChatRoom = () => {
       </div>
     </div>
   );
-};
+}

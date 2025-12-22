@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { socketAtom } from "../store/atom";
-import { message } from "../types";
+import { MessageInterface } from "../types";
 import { Message } from "./Message";
 
 export const Messages = () => {
     const socket = useRecoilValue(socketAtom);
-    const [messages, setMessages] = useState<message[]>([]);
+    const [messages, setMessages] = useState<MessageInterface[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const prevMessagesRef = useRef(messages);
-    // useEffect(() => {
-    //   localStorage.setItem("messages", JSON.stringify(messages));
-    // }, [messages]);
+    useEffect(() => {
+      localStorage.setItem("messages", JSON.stringify(messages));
+    }, [messages]);
     useEffect(() => {
       socket.onmessage = (ev) => {
         let parsedData = JSON.parse(ev.data);
@@ -19,7 +19,7 @@ export const Messages = () => {
           console.log("parsedData: ", parsedData);
         } else if (parsedData.type === "new_message") {
           parsedData = parsedData.payload.data;
-          const messageObj: message = {
+          const messageObj: MessageInterface = {
             name: parsedData.name,
             message: parsedData.message,
             date: parsedData.date,
