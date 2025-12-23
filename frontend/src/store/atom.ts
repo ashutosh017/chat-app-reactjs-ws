@@ -6,9 +6,10 @@ export const userAtom = atom({
   default: null,
 });
 
-export const socketAtom = atom({
+export const socketAtom = atom<WebSocket | null>({
   key: "socket",
-  default: new WebSocket(import.meta.env.VITE_WS_URL ?? "ws://localhost:8080"),
+  // default: new WebSocket(import.meta.env.VITE_WS_URL ?? "ws://localhost:8080"),
+  default: null,
 });
 
 export const messageAtom = atom({
@@ -23,7 +24,8 @@ export const nameAtom = atom({
 
 export const messagesAtom = atom<MessageInterface[]>({
   key: "messages",
-  default: JSON.parse(localStorage.getItem("messages") || "[]"),
+  // default: JSON.parse(localStorage.getItem("messages") || "[]"),
+  default: [],
 });
 
 export const roomIdAtom = atom<string>({

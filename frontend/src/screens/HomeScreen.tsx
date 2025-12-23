@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { avatarAtom, nameAtom, roomIdAtom, socketAtom } from "../store/atom";
 import { useNavigate } from "react-router-dom";
@@ -12,73 +12,54 @@ function HomeScreen() {
   const roomIdInputRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
 
+  const socket = useRecoilValue(socketAtom);
   const [avatar, setAvatar] = useRecoilState(avatarAtom);
 
   const setRoomId = useSetRecoilState(roomIdAtom);
-  const socket = useRecoilValue(socketAtom);
   const setName = useSetRecoilState(nameAtom);
 
-  useEffect(() => {
-    localStorage.setItem("socket", JSON.stringify(socket));
-    socket.onmessage = (ev) => {
-      const parsedData = JSON.parse(ev.data);
-      alert(parsedData.payload.data);
-    };
+  const joinRoom = useCallback(
+    (name: string, roomId: string, avatar: string) => {
+      name =
+        name +
+        "-" +
+        Math.floor(Number(Math.random().toFixed(10)) * 10000000000);
+      setRoomId(roomId);
+      setName(name);
+      setAvatar(avatar);
 
-    socket.onclose = (ev) => {
-      console.log("event: ", ev, "\n has left");
-    };
-  }, []);
+      navigate(`/chatroom/${roomId}`);
+    },
+    []
+  );
 
-  const joinRoom = (
-    socket: WebSocket,
-    joiners_name: string | undefined,
-    roomId: string | undefined,
-    avatar: string | undefined
-  ) => {
-    if (
-      joiners_name === undefined ||
-      joiners_name === "" ||
-      roomId === undefined
-    ) {
+  const handleJoinRoom = useCallback(() => {
+    const randomRoomId = generateRandomRoomId();
+    const name = nameRef.current?.value;
+    const inputRoomId = roomIdInputRef?.current?.value;
+    const roomId =
+      inputRoomId?.length === 0 || !inputRoomId ? randomRoomId : inputRoomId;
+
+    if (name === undefined) {
       alert("joiners name cannot be undefined");
       return;
     }
-    let name2 =
-      joiners_name +
-      "-" +
-      Math.floor(Number(Math.random().toFixed(10)) * 10000000000);
-    localStorage.setItem("socket", JSON.stringify(socket));
-    localStorage.setItem("name", joiners_name);
-    localStorage.setItem("roomId", roomId);
-    localStorage.setItem("avatar", avatar ?? "");
-    setRoomId(roomId);
-    setName(name2);
-    navigate(`/chatroom/${roomId}`);
-  };
+    joinRoom(name, roomId, avatar);
+  }, [socket]);
 
-  const handleJoinRoom = () => {
-    const randomRoomId = generateRandomRoomId();
-    joinRoom(
-      socket,
-      nameRef.current?.value,
-      roomIdInputRef.current?.value === ""
-        ? randomRoomId
-        : roomIdInputRef.current?.value,
-      avatar
-    );
-  };
-
-  const onAvatarInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        setAvatar(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const onAvatarInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          setAvatar(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [avatar]
+  );
   return (
     <div className="p-4 lg:p-16 h-screen w-full bg-zinc-900 ">
       <div className="flex flex-col space-y-2 lg:w-1/2  mx-auto">

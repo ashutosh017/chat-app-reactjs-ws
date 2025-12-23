@@ -1,22 +1,20 @@
 import { WebSocket, WebSocketServer } from "ws";
-// import cron from "node-cron";
 import express from "express";
 import http from "http";
 import { randomUUID } from "crypto";
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-app.get("/", (req, res) => {
-  res.send("HTTP server is running");
-});
 
-type User = {
+interface User {
   id: string;
   name: string;
   socket: WebSocket;
   roomId: string;
   avatar: string;
-};
+}
+
 class ChatRoom {
   private users: User[];
   private room: Map<string, User[]>;
@@ -125,15 +123,3 @@ class ChatRoom {
 server.listen(8080, () => console.log("hello"));
 
 new ChatRoom();
-
-// const broadcastMessage = (message: string) => {
-//   wss.clients.forEach((client) => {
-//     if (client.readyState === WebSocket.OPEN) {
-//       client.send(message);
-//     }
-//   });
-// };
-// cron.schedule("*/5 * * * *", () => {
-//   console.log("Cron job executed: Broadcasting message to all clients");
-//   broadcastMessage("This is a scheduled message from the server!");
-// });

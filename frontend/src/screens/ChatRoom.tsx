@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
   avatarAtom,
   iamgeAtom,
@@ -14,34 +14,39 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Messages } from "../components/Messages";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function ChatRoom() {
-  const messageRef = useRef<HTMLInputElement>(null);
-  const socket = useRecoilState(socketAtom)[0];
-  const [name, setName] = useRecoilState(nameAtom);
-  const [roomId, setRoomId] = useRecoilState(roomIdAtom);
   const [selectedImage, setSelectedImage] = useRecoilState(iamgeAtom);
-  const imageRef = useRef<HTMLInputElement>(null);
-  const avatar = useRecoilValue(avatarAtom);
-  const setAvatar = useSetRecoilState(avatarAtom);
+  const [roomId, setRoomId] = useRecoilState(roomIdAtom);
   const [selectedImageName, setSelectedImageName] = useState("");
 
+  const socket = useRecoilValue(socketAtom);
+  const name = useRecoilValue(nameAtom);
+
+  const messageRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const avatar = useRecoilValue(avatarAtom);
+
+  const { routeRoomId } = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
-    const roomId2 = localStorage.getItem("roomId") as string;
-    const name2 = localStorage.getItem("name") as string;
-    const avatar2 = localStorage.getItem("avatar") as string;
-    setRoomId(roomId2);
-    setName(name2);
-    setAvatar(avatar2);
+    if (!socket || !name) {
+      navigate("/");
+      return;
+    }
+    if (routeRoomId && routeRoomId.trim().length > 0) {
+      setRoomId(routeRoomId);
+    }
 
     const sendMessage = () => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(
           JSON.stringify({
             type: "new_joining",
-            roomId: roomId2,
-            name: name2,
-            avatar: avatar2,
+            roomId: roomId,
+            name: name,
+            avatar: avatar,
           })
         );
       } else {
@@ -55,13 +60,12 @@ export default function ChatRoom() {
       sendMessage();
     }
 
-    // Clean up the event listener
     return () => {
       socket.removeEventListener("open", sendMessage);
     };
   }, []);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     const now = new Date();
     let hours = now.getHours();
     const minutes = now.getMinutes();
@@ -101,21 +105,23 @@ export default function ChatRoom() {
     }
     messageRef.current?.focus();
     setSelectedImageName("");
-  };
+  }, [socket, name, roomId, avatar, selectedImage]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (imageRef.current?.files) console.log(imageRef.current?.files[0].name);
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      setSelectedImageName(file.name);
-      reader.onload = () => {
-        setSelectedImage(reader.result as string);
-        // console.log("reader.result as string = ",reader.result)
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (imageRef.current?.files) console.log(imageRef.current?.files[0].name);
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        setSelectedImageName(file.name);
+        reader.onload = () => {
+          setSelectedImage(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [selectedImage]
+  );
   return (
     <div className="p-2 lg:p-32 flex flex-col items-center h-screen w-full bg-zinc-900 text-white justify-end">
       <ToastContainer />
