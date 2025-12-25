@@ -17,5 +17,8 @@ RUN npm install
 # Expose both ports
 EXPOSE 5173 8080
 
-# Run both servers
-CMD sh -c "cd /app/frontend && npm run dev & cd /app/ws && npm run dev"
+# Install concurrently to run both servers
+RUN npm install -g concurrently
+
+# Run both servers using concurrently with JSON CMD
+CMD ["concurrently", "npm:dev --prefix /app/frontend", "npm:dev --prefix /app/ws"]

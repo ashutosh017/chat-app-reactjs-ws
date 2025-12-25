@@ -18,33 +18,26 @@ function HomeScreen() {
   const setRoomId = useSetRecoilState(roomIdAtom);
   const setName = useSetRecoilState(nameAtom);
 
-  const joinRoom = useCallback(
-    (name: string, roomId: string, avatar: string) => {
-      name =
-        name +
-        "-" +
-        Math.floor(Number(Math.random().toFixed(10)) * 10000000000);
-      setRoomId(roomId);
-      setName(name);
-      setAvatar(avatar);
-
-      navigate(`/chatroom/${roomId}`);
-    },
-    []
-  );
+ 
 
   const handleJoinRoom = useCallback(() => {
-    const randomRoomId = generateRandomRoomId();
-    const name = nameRef.current?.value;
-    const inputRoomId = roomIdInputRef?.current?.value;
-    const roomId =
-      inputRoomId?.length === 0 || !inputRoomId ? randomRoomId : inputRoomId;
-
+    let name = nameRef.current?.value;
     if (name === undefined) {
       alert("joiners name cannot be undefined");
       return;
     }
-    joinRoom(name, roomId, avatar);
+
+    const randomRoomId = generateRandomRoomId();
+    const inputRoomId = roomIdInputRef?.current?.value;
+    const roomId =
+      inputRoomId?.length === 0 || !inputRoomId ? randomRoomId : inputRoomId;
+
+    name =
+      name + "-" + Math.floor(Number(Math.random().toFixed(10)) * 10000000000);
+    setRoomId(roomId);
+    setName(name);
+
+    navigate(`/chatroom/${roomId}`);
   }, [socket]);
 
   const onAvatarInputChange = useCallback(
